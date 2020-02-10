@@ -5,8 +5,8 @@ import (
 	"sync"
 	//"fmt"
 
-	tfcore "tensorflow/core/framework"
-	tf "tensorflow_serving/apis"
+	tfcore "github.com/Arnold1/tfs-client/proto/tensorflow/core/framework"
+	tf "github.com/Arnold1/tfs-client/proto/tensorflow_serving/apis"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
