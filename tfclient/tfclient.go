@@ -3,6 +3,8 @@ package tfclient
 import (
 	"errors"
 	"sync"
+	"time"
+	"log"
 	//"fmt"
 
 	tfcore "github.com/Arnold1/tfs-client/proto/tensorflow/core/framework"
@@ -45,30 +47,35 @@ func (c *PredictionClient) Predict(modelName string) ([]Prediction, error) {
 	md := createHeaders("x-model-partition", "4-2")
 	outCtx := metadata.NewOutgoingContext(context.Background(), *md)
 
-	resp, err := c.svcConn.Predict(outCtx, &tf.PredictRequest{
-		ModelSpec: &tf.ModelSpec{
-			Name: modelName,
-		},
-		Inputs: map[string]*tfcore.TensorProto{
-			"height": &tfcore.TensorProto{
-				Dtype:       tfcore.DataType_DT_INT64,
-				Int64Val:    []int64{1},
-				TensorShape: &tfcore.TensorShapeProto{
-					Dim: []*tfcore.TensorShapeProto_Dim{{Size: 1}},
-				},
-			},
-			"width": &tfcore.TensorProto{
-				Dtype:       tfcore.DataType_DT_INT64,
-				Int64Val:    []int64{1},
-				TensorShape: &tfcore.TensorShapeProto{
-					Dim: []*tfcore.TensorShapeProto_Dim{{Size: 1}},
-				},
-			},
-		},
-	})
+	req := &tf.PredictRequest{
+                ModelSpec: &tf.ModelSpec{
+                        Name: modelName,
+                },
+                Inputs: map[string]*tfcore.TensorProto{
+                        "height": &tfcore.TensorProto{
+                                Dtype:       tfcore.DataType_DT_INT64,
+                                Int64Val:    []int64{1},
+                                TensorShape: &tfcore.TensorShapeProto{
+                                        Dim: []*tfcore.TensorShapeProto_Dim{{Size: 1}},
+                                },
+                        },
+                        "width": &tfcore.TensorProto{
+                                Dtype:       tfcore.DataType_DT_INT64,
+                                Int64Val:    []int64{1},
+                                TensorShape: &tfcore.TensorShapeProto{
+                                        Dim: []*tfcore.TensorShapeProto_Dim{{Size: 1}},
+                                },
+                        },
+                },
+        }
+
+	start := time.Now()
+	resp, err := c.svcConn.Predict(outCtx, req)
 	if err != nil {
 		return nil, err
 	}
+	elapsed := time.Since(start)
+	log.Printf("Predict took %s", elapsed)
 
 	//fmt.Println("resp:", resp)
 
